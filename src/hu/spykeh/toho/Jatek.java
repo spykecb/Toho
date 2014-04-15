@@ -1,7 +1,12 @@
 package hu.spykeh.toho;
 
+import hu.spykeh.toho.entities.Player;
+import hu.spykeh.toho.entities.PlayerMP;
 import hu.spykeh.toho.gfx.Screen;
 import hu.spykeh.toho.levels.Level;
+import hu.spykeh.toho.net.GameClient;
+import hu.spykeh.toho.net.GameServer;
+import hu.spykeh.toho.net.packets.Packet00Login;
 
 import java.awt.Canvas;
 import java.awt.Dimension;
@@ -11,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class Jatek extends Canvas implements Runnable {
 
@@ -20,12 +26,13 @@ public class Jatek extends Canvas implements Runnable {
 	private int height = width / 4 * 3;
 	private int scale = 3;
 	public JFrame frame;
-	Graphics g;
+	public Graphics g;
 	int asd = 0;
-	BufferStrategy bs;
-	Screen screen;
+	public BufferStrategy bs;
+	public Screen screen;
 	public Keyboard keyboard;
-	Level level;
+	public Level level;
+	public PlayerMP player;
 	public static int state = 0;
 	private Thread thread;
 	private BufferedImage image = new BufferedImage(width, height,
@@ -35,6 +42,9 @@ public class Jatek extends Canvas implements Runnable {
 
 
 	private boolean running = false;
+	
+	private GameServer server;
+	private GameClient client;
 
 	public Jatek(String gameName) {
 		this.gameName = gameName;
@@ -48,7 +58,8 @@ public class Jatek extends Canvas implements Runnable {
 		setPreferredSize(size);
 		keyboard = new Keyboard();
 		addKeyListener(keyboard);
-		level = new Level(keyboard);
+		player = new PlayerMP(level,JOptionPane.showInputDialog("enter username "),100,100,keyboard,null,-1);
+		level = new Level(keyboard,player);
 		
 	}
 
@@ -56,6 +67,19 @@ public class Jatek extends Canvas implements Runnable {
 		running = true;
 		thread = new Thread(this, "Game Thread");
 		thread.start();
+		
+		if(JOptionPane.showConfirmDialog(this, "Do you want to run the server?") == 0){
+			server = new GameServer(this);
+			server.start();
+		}
+		client = new GameClient(this, "localhost");
+		client.start();
+		Packet00Login loginPacket = new Packet00Login(player.getUsername());
+		if(server != null){
+			server.addConnection(player, loginPacket);
+		}
+		
+		loginPacket.writeData(client);
 	}
 
 	public synchronized void stop() {
@@ -95,6 +119,7 @@ public class Jatek extends Canvas implements Runnable {
 	}
 
 	public void run() {
+		
 		int fps = 0;
 		int ups = 0;
 		int frames = 0;

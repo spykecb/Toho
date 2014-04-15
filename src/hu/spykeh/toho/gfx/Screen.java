@@ -65,7 +65,16 @@ public class Screen {
 	}
 
 	public void renderProjectile(int xp, int yp, Projectile p){
-		
+		for(int x = 0 ; x < p.sprite.SIZE ; x++){
+			int xa = xp + x; //abszolut pozicio
+				for(int y = 0 ; y < p.sprite.SIZE ; y++){
+					int ya = yp + y; //abszolut pozicio
+					if(ya < 0 || xa < 0 || ya > height || xa > width) break;
+					int color = p.sprite.pixels[y*p.sprite.SIZE + x];
+					if(color != 0xffff00ff)
+						pixels[ya*width + xa] = p.sprite.pixels[y*p.sprite.SIZE + x];
+				}
+		}
 	}
 	
 }

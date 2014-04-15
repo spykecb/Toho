@@ -5,11 +5,12 @@ import hu.spykeh.toho.sprites.Sprite;
 
 public class DefaultProjectile extends Projectile{
 
-	public DefaultProjectile(Sprite sprite){
-		super(sprite);
+	public DefaultProjectile(Sprite sprite, int dmg){
+		super(sprite,dmg);
 	}
 	
 	public void render(int x, int y, Screen screen){
-		screen.renderProjectile(x,y,this);
+		if(fired)
+			screen.renderProjectile(x,y,this);
 	}
 }

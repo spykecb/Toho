@@ -9,7 +9,7 @@ public class StageOne {
 	
 	public ArrayList<Mob> mobs = new ArrayList<Mob>();
 	public StageOne(){
-		mobs.add(new Mob("Mob01",100,50));
+		mobs.add(new Mob("Mob01",100,50,null));
 	}
 	
 	public void render(Screen screen){

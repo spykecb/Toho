@@ -1,8 +1,12 @@
 package hu.spykeh.toho.levels;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import hu.spykeh.toho.Jatek;
 import hu.spykeh.toho.Keyboard;
 import hu.spykeh.toho.entities.Player;
+import hu.spykeh.toho.entities.PlayerMP;
 import hu.spykeh.toho.gfx.Screen;
 
 
@@ -10,13 +14,13 @@ public class Level{
 
 	public Menu m;
 	public Stage stage;
-	Keyboard input;
-	Player player;
-	public Level(Keyboard input){
+	public Keyboard input;
+	private ArrayList<PlayerMP> player = new ArrayList<PlayerMP>();
+	public Level(Keyboard input, PlayerMP player){
 		this.input = input;
 		m = new Menu(input);
-		player = new Player("spykeh",100,150,input);
-		stage = new Stage(input, player);
+		this.player.add(player);
+		stage = new Stage(input, this.player);
 	}
 	public void render(Screen screen){
 		
@@ -26,15 +30,18 @@ public class Level{
 			stage.render(screen);
 		}
 	}
-	
+
 	public void update(){
 		if(Jatek.state == 0){
 			m.update();
 		}else if(Jatek.state == 1){
+
 			stage.update();
 		}
 		
 	}
-	
+	public void addPlayer(PlayerMP p){
+		player.add(p);
+	}
 
 }
