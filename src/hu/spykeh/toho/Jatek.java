@@ -21,6 +21,8 @@ import javax.swing.JOptionPane;
 public class Jatek extends Canvas implements Runnable {
 
 	private static final long serialVersionUID = 1L;
+	public static int state = 0;
+	public static Jatek jatek;
 	private String gameName;
 	private int width = 300;
 	private int height = width / 4 * 3;
@@ -33,7 +35,8 @@ public class Jatek extends Canvas implements Runnable {
 	public Keyboard keyboard;
 	public Level level;
 	public PlayerMP player;
-	public static int state = 0;
+	
+	public String jatekosNev;
 	private Thread thread;
 	private BufferedImage image = new BufferedImage(width, height,
 			BufferedImage.TYPE_INT_RGB);
@@ -43,10 +46,11 @@ public class Jatek extends Canvas implements Runnable {
 
 	private boolean running = false;
 	
-	private GameServer server;
-	private GameClient client;
+	public GameServer server;
+	public GameClient client;
 
 	public Jatek(String gameName) {
+		jatek = this;
 		this.gameName = gameName;
 		screen = new Screen(width, height);
 		frame = new JFrame();
@@ -58,8 +62,9 @@ public class Jatek extends Canvas implements Runnable {
 		setPreferredSize(size);
 		keyboard = new Keyboard();
 		addKeyListener(keyboard);
-		player = new PlayerMP(level,JOptionPane.showInputDialog("enter username "),100,100,keyboard,null,-1);
-		level = new Level(keyboard,player);
+		jatekosNev = JOptionPane.showInputDialog("Enter username ");
+		level = new Level(keyboard,this);
+		
 		
 	}
 
@@ -74,12 +79,7 @@ public class Jatek extends Canvas implements Runnable {
 		}
 		client = new GameClient(this, "localhost");
 		client.start();
-		Packet00Login loginPacket = new Packet00Login(player.getUsername());
-		if(server != null){
-			server.addConnection(player, loginPacket);
-		}
 		
-		loginPacket.writeData(client);
 	}
 
 	public synchronized void stop() {
@@ -128,7 +128,6 @@ public class Jatek extends Canvas implements Runnable {
 		long lastTime = System.nanoTime();
 		final double ns = 1000000000.0 / 60.0;
 		double delta = 0;
-
 		requestFocus();
 		while (running) {
 			long curTime = System.nanoTime();
@@ -145,7 +144,7 @@ public class Jatek extends Canvas implements Runnable {
 				totalTime -= 1000000000.0;
 				fps = frames;
 				ups = updates;
-				frame.setTitle(gameName + " | FPS : " + fps + "  UPS : " + ups);
+				frame.setTitle(gameName + " FPS : " + fps + "  UPS : " + ups);
 				frames = 0;
 				updates = 0;
 			}

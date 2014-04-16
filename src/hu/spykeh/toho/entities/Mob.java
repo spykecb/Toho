@@ -29,10 +29,10 @@ public class Mob {
 	}
 	
 	public int getX(){
-		return xPos + (Sprite.mob1.SIZE/2);
+		return xPos;
 	}
 	public int getY(){
-		return yPos + (Sprite.mob1.SIZE/2);
+		return yPos;
 	}
 	
 	public void move(){

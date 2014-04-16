@@ -3,47 +3,51 @@ package hu.spykeh.toho.net.packets;
 import hu.spykeh.toho.net.GameClient;
 import hu.spykeh.toho.net.GameServer;
 
-public class Packet00Login extends Packet{
+public class Packet02Move extends Packet {
 
 	private String username;
-	private int x,y;
-	public Packet00Login(byte[] data) {
-		super(00);
+	private int x, y;
+
+	public Packet02Move(byte[] data) {
+		super(02);
 		String[] dataArray = readData(data).split(",");
-		this.username = dataArray[0];;
+		this.username = dataArray[0];
 		this.x = Integer.parseInt(dataArray[1]);
 		this.y = Integer.parseInt(dataArray[2]);
 	}
-	
-	public Packet00Login(String username, int x, int y) {
-		super(00);
+
+	public Packet02Move(String username, int x, int y) {
+		super(02);
+		this.username = username;
 		this.x = x;
 		this.y = y;
-		this.username = username;
 	}
 
+	@Override
 	public void writeData(GameClient client) {
 		client.sendData(getData());
 	}
 
+	@Override
 	public void writeData(GameServer server) {
 		server.sendDataToAllClients(getData());
 	}
 
 	@Override
 	public byte[] getData() {
-		return ("00" + this.username + "," + this.x + "," + this.y).getBytes();
+		return ("02" + username + "," + x + "," + y).getBytes();
+	}
+
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
 	}
 	
 	public String getUserName(){
 		return username;
-	}
-	
-	public int getX(){
-		return x;
-	}
-	public int getY(){
-		return y;
 	}
 
 }

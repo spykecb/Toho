@@ -30,8 +30,9 @@ public class Menu{
 	}
 	
 	public void update(){
-		if(input.enter){
+		if(input.enter && Jatek.state == 0){
 			if(chosen == 0)
+				System.out.println("Stage-re lépés");
 				Jatek.state = 1;
 			if(chosen == 2){
 				

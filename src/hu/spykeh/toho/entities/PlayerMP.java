@@ -2,27 +2,34 @@ package hu.spykeh.toho.entities;
 
 import java.net.InetAddress;
 
+import hu.spykeh.toho.Jatek;
 import hu.spykeh.toho.Keyboard;
-import hu.spykeh.toho.levels.Level;
+import hu.spykeh.toho.levels.Stage;
 
 public class PlayerMP extends Player{
 
-	private String name;
 	public InetAddress ip;
 	public int port;
-	public PlayerMP(Level level,String name, int x, int y, Keyboard input, InetAddress ip, int port) {
-		super(level,name, x, y, input);
-		this.name = name;
+	public boolean online = true;
+	public PlayerMP(Stage stage,String name, int x, int y, Keyboard input, InetAddress ip, int port) {
+		super(stage,name, x, y, input);
 		this.ip = ip;
 		this.port = port;
 	}
-	public PlayerMP(Level level,String name, int x, int y, InetAddress ip, int port) {
-		super(level,name, x, y, null);
+	public PlayerMP(Stage stage,String name, int x, int y, InetAddress ip, int port) {
+		super(stage,name, x, y, null);
 		this.ip = ip;
 		this.port = port;
 	}
 	
 	public void update(){
 		super.update();
+	}
+	public void quit(){
+		if(input.esc){
+			Jatek.state = 0;
+			online = false;
+			System.out.println("quitMP");
+		}
 	}
 }
