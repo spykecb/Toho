@@ -20,7 +20,7 @@ public class Font {
 	public static void render(String msg, int x, int y, Screen screen, int color) {
 		msg = msg.toUpperCase();
 		for (int i = 0; i < msg.length(); i++) {
-			screen.renderFont(x + i*8, y, font.get(chars.indexOf(msg.charAt(i))), color);
+			screen.renderFont(x + i*8, y, font.get(chars.indexOf(msg.charAt(i))), color,1);
 		}
 
 	}

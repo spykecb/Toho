@@ -4,12 +4,13 @@ import hu.spykeh.toho.Jatek;
 import hu.spykeh.toho.Keyboard;
 import hu.spykeh.toho.gfx.Screen;
 
+public class StartMenu extends Menu {
 
-public class Options extends Menu {
+	private String[] menu = { "Start offline game", "Start Online Server",
+			"Connect to Server" };
+	private String[] menuValue = { "", "", "" };
 
-	private String[] menu = {"Name:"};
-	private String[] menuValue = {""};
-	public Options(Keyboard input){
+	public StartMenu(Keyboard input) {
 		super(input);
 		chosen = 0;
 	}
@@ -21,7 +22,7 @@ public class Options extends Menu {
 	}
 
 	public void update() {
-		menuValue[0] = Jatek.jatek.jatekosNev;
+
 		if (Menu.chosen > menu.length - 1)
 			Menu.chosen = 0;
 		if (Menu.chosen < 0)

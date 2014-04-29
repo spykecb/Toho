@@ -1,7 +1,5 @@
 package hu.spykeh.toho.levels;
 
-import javax.swing.JOptionPane;
-
 import hu.spykeh.toho.Jatek;
 import hu.spykeh.toho.Keyboard;
 import hu.spykeh.toho.entities.PlayerMP;
@@ -10,41 +8,54 @@ import hu.spykeh.toho.gfx.Screen;
 
 public class Level{
 
-	public Menu m;
+	public Menu menu;
+	public StageMP stageMP;
 	public Stage stage;
 	public Keyboard input;
 	PlayerMP player;
 	Jatek jatek;
 	public Level(Keyboard input,Jatek jatek){
+		stageMP = new StageMP(jatek);
+		stage = new Stage(jatek);
+		
 		this.jatek = jatek;
 		this.input = input;
-		m = new Menu(input);
+		menu = new Menu(input);
 	}
 	
 	public void render(Screen screen){
-		
 		if(Jatek.state == 0){
-			m.render(screen);
+			menu.render(screen);
+			
 			/*
 			if(stage != null){
 				stage = null;
 				System.out.println("Stage kitörölve");
 			}*/
 		}else if(Jatek.state == 1){
-			if(stage == null){
-				stage = new Stage(jatek);
-				System.out.println("Stage elinditva");
+			if(Jatek.offline){
+				stage.render(screen);
+			}else{
+				stageMP.render(screen);
 			}
-			stage.render(screen);
+			
+		}else{
+			System.out.println("wrong state brah");
 		}
 	}
 
 	public void update(){
+		if(input.enter){
+			System.out.println("enter");
+		}
 		if(Jatek.state == 0){
-			m.update();
+				menu.update();
 		}else if(Jatek.state == 1){
-
-			stage.update();
+			if(Jatek.offline){
+				stage.update();
+			}else{
+				stageMP.update();
+			}
 		}
 		
 	}

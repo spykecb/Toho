@@ -1,142 +1,124 @@
 package hu.spykeh.toho.levels;
 
 import java.util.ArrayList;
-
-import javax.swing.JOptionPane;
+import java.util.List;
 
 import hu.spykeh.toho.Jatek;
 import hu.spykeh.toho.entities.Mob;
-import hu.spykeh.toho.entities.PlayerMP;
-import hu.spykeh.toho.gfx.Font;
+import hu.spykeh.toho.entities.Player;
+import hu.spykeh.toho.entities.PlayerBot;
 import hu.spykeh.toho.gfx.Screen;
-import hu.spykeh.toho.net.packets.Packet00Login;
-import hu.spykeh.toho.net.packets.Packet01Disconnect;
 import hu.spykeh.toho.projectile.Projectile;
-import hu.spykeh.toho.tile.Tile;
+import hu.spykeh.toho.sprites.Sprite;
+
 
 public class Stage {
-	protected String scoreStr = "Score";
-	protected int score = 0;
-	public static int sizeX;
-	public static int sizeY;
-	public static int x;
-	public static int y;
-	PlayerMP player;
+	public int mode;
 	Jatek jatek;
-	public ArrayList<PlayerMP> players = new ArrayList<PlayerMP>();
-	StageOne stageOne;
+	
+	public Player player;
+	public PlayerBot playerBot;
+	public List<Player> players = new ArrayList<Player>();
+	public static Stage stage;
+	private boolean readyToSpawn = true;
+	private boolean stageCreated = false;
+	private boolean gotWinner = false;
+	protected StageOne stageOne1;
+	protected StageOne stageOne2;
+	protected int diff;
+	public static boolean gameStarted = false;
 	public Stage(Jatek jatek){
 		this.jatek = jatek;
-		player = new PlayerMP(this,jatek.jatekosNev,100,100,jatek.keyboard,null,-1);
-		addPlayer(player);
-		Packet00Login loginPacket = new Packet00Login(player.getUsername(),player.getX(),player.getY());
-		if(jatek.server != null){ //szerverként hozzáadjuk a játékost
-			jatek.server.addConnection(player, loginPacket);
-		}
+		stage = this;
+
+		playerBot = new PlayerBot(this,"BOT", Sprite.player,100,100,null,1);
 		
-		loginPacket.writeData(jatek.client); //szervernek küldjük az adatot
-		stageOne = new StageOne();
-		x = 16;
-		y = 16;
+		players.add(playerBot);
+		
 	}
 	public void render(Screen screen){
-		sizeX = screen.width - 7*16;
-		sizeY = screen.height - 3*16;
-		Font.render(scoreStr,screen.width-80,20,screen,0xffffff);
-		Font.render(String.valueOf(score), screen.width-80, 35, screen, 0xffffff);
 		
-		for(int i = x ; i < sizeX + x ; i = i + 16){
-			for(int j = y ; j < sizeY + y ; j = j + 16){
-				Tile.stone.render(i,j,screen);
-			}
+		if(stageOne1 != null){
+			stageOne1.render(screen);
+			stageOne2.render(screen);
 		}
-		for(PlayerMP p : players){
+		
+		for(Player p : players){
 			p.render(screen);
-			Font.render(p.getUsername(), p.getX()-10, p.getY()-8, screen, 0xffffff);
 		}
-		
-		stageOne.render(screen);
 		
 	}
 	public void update(){
-		int index = 0;
-		boolean shouldDelete = false;
-		for(PlayerMP p : players){
+		if(!stageCreated){
+			System.out.println("Stage létrehozva");
+			System.out.println("Offline");
+			stageOne1 = new StageOne(jatek,0,16,16,player);
+			stageOne2 = new StageOne(jatek,1,Jatek.width/2,16,playerBot);	
+			diff = stageOne2.x - stageOne1.x;
+			stageCreated = true;
+			
+		}else{
+			stageOne1.update();
+			stageOne2.update();
+		}
+		
+		
+		for(Player p : players){
 			p.update();
-			if(!p.online){
-				shouldDelete = true;
+			if(p.getHp() == 0){
+				gotWinner = true;
 				break;
 			}
-			index++;
 		}
-		if(shouldDelete)
-			removePlayer(index);
-		shouldDelete = false;
-		
-		
-		/*TODO: mindegyik projectilera ellenõrizze, hogy eltalál-e valamit, fontos tudni a forrást is.
-		for(int i = 0 ; i < player.projectiles.size() ; i++){
-			if(collision(player.projectiles.get(i),stageOne.mobs.get(0))){
-				score++;
-				player.projectiles.get(i).remove();
+		if(gotWinner){
+			for(Player p : players){
+				if(p.getHp() != 0){
+					Jatek.state = 0;
+					Menu.type = Menu.menuType("30");
+					Jatek.jatek.level.menu.winner = p.getName();
+					System.out.println("Játék vége -> main menu");
+					removeStages();
+				}
 			}
-		}*/
+			
+		}
+
 	}
 	
 	public boolean collision(Projectile p, Mob m){
-		
-		if(Math.abs(p.getY() - m.getY()) < m.hitbox && Math.abs(p.getX() - m.getX()) < m.hitbox){
-			System.out.println("collided");
+		int px1 = (int)p.getX() + p.hitboxFromX;
+		int py1 = (int)p.getY() + p.hitboxFromY;
+		int px2 = (int)p.getX() + p.hitboxToX;
+		int py2 = (int)p.getY() + p.hitboxToY;
+		int mx1 = (int)m.getX() + m.hitboxFromX;
+		int my1 = (int)m.getY() + m.hitboxFromY;
+		int mx2 = (int)m.getX() + m.hitboxToX;
+		int my2 = (int)m.getY() + m.hitboxToY;
+		if(px2 > mx1 && px2 < mx2 && py1 < my2 && py1 > my1 ||
+			px1 < mx2 && px1 > mx1 && py1 < my2 && py1 > my1 || 
+			px2 > mx1 && px2 < mx2 && py2-2 > my1 && py2 < my2 || 
+			px1 < mx2 && px1 > mx1 && py2 > my1 && py2 < my2){
 			return true;
 		}else{
 			return false;
 		}
 		
+		
 	}
 	
-	public void addPlayer(PlayerMP p){
-		players.add(p);
+	public StageOne getStageOne(int i){
+		if(i == 0){
+			return this.stageOne1;
+		}else return this.stageOne2;
 	}
 	
-	/*GameCLientnél használjuk fel*/
-	public void removePlayer(String username){
-		int index = 0;
-		for(PlayerMP p : players){
-			if(p.getUsername().equals(username)){
-				break;
-			}
-			index++;
-		}
-		players.remove(index);
+	public void removeStages(){
+		stageOne1 = null;
+		stageOne2 = null;
+		stageCreated = false;
 	}
-	
-	/*Megadja a törlendõ játékos ID-jét a játékosok arrayból*/
-	public void removePlayer(int index){
-		Packet01Disconnect packet = new Packet01Disconnect(players.get(index).getUsername());
-		players.remove(index);
-		packet.writeData(jatek.client);
-			
+	public int getDiff(){
+		return this.diff;
 	}
-	
-	public int getPlayerMPIndex(String username){
-		int index = 0;
-		for(PlayerMP p : players){
-			if(p.getUsername().equals(username)){
-				break;
-			}
-			index++;
-		}
-		return index;
-	}
-	
-	/*Megmozgatja az adott játékost*/
-	public void movePlayer(String username, int x, int y){
-		int index = getPlayerMPIndex(username);
-		players.get(index).setPos(x, y);
-	}
-	
-	public void setShooting(String username, boolean shooting){
-		int index = getPlayerMPIndex(username);
-		players.get(index).setShooting(shooting);;
-	}
+
 }

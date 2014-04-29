@@ -3,25 +3,27 @@ package hu.spykeh.toho.net.packets;
 import hu.spykeh.toho.net.GameClient;
 import hu.spykeh.toho.net.GameServer;
 
-public class Packet00Login extends Packet{
-
-	private String username;
+public class Packet04MobSpawn extends Packet{
+	private String name;
 	private int x,y;
+	private int hp;
 	private int side;
-	public Packet00Login(byte[] data) {
-		super(00);
+	public Packet04MobSpawn(byte[] data) {
+		super(04);
 		String[] dataArray = readData(data).split(",");
-		this.username = dataArray[0];;
+		this.name = dataArray[0];
 		this.x = Integer.parseInt(dataArray[1]);
 		this.y = Integer.parseInt(dataArray[2]);
-		this.side = Integer.parseInt(dataArray[3]);
+		this.hp = Integer.parseInt(dataArray[3]);
+		this.side = Integer.parseInt(dataArray[4]);
 	}
 	
-	public Packet00Login(String username, int x, int y, int side) {
-		super(00);
+	public Packet04MobSpawn(String name, int x, int y, int hp, int side) {
+		super(04);
 		this.x = x;
 		this.y = y;
-		this.username = username;
+		this.name = name;
+		this.hp = hp;
 		this.side = side;
 	}
 
@@ -35,11 +37,11 @@ public class Packet00Login extends Packet{
 
 	@Override
 	public byte[] getData() {
-		return ("00" + this.username + "," + this.x + "," + this.y + "," + this.side).getBytes();
+		return ("04" + this.name + "," + this.x + "," + this.y + "," + this.hp + "," + this.side).getBytes();
 	}
 	
-	public String getUserName(){
-		return username;
+	public String getName(){
+		return name;
 	}
 	
 	public int getX(){
@@ -49,8 +51,10 @@ public class Packet00Login extends Packet{
 		return y;
 	}
 	
+	public int getHP(){
+		return hp;
+	}
 	public int getSide(){
 		return side;
 	}
-
 }

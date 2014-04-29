@@ -11,10 +11,11 @@ public class Sprite {
 	public final int SIZE;
 	public int[] pixels;
 	
-	public static Sprite player = new Sprite(0,4,32,SpriteSheet.sheet);
+	public static Sprite player = new Sprite(1,15,16,SpriteSheet.sheet);
 	public static Sprite stone = new Sprite(3,0,16,SpriteSheet.sheet);
-	public static Sprite mob1 = new Sprite(3,4,32,SpriteSheet.sheet);
-	public static Sprite projectile = new Sprite(0,1,16,SpriteSheet.sheet);
+	public static Sprite mob1 = new Sprite(4,15,16,SpriteSheet.sheet);
+	public static Sprite projectile1 = new Sprite(0,1,16,SpriteSheet.sheet);
+	public static Sprite projectile2 = new Sprite(1,1,16,SpriteSheet.sheet);
 
 	public Sprite(int x, int y, int size, SpriteSheet sheet){
 		this.x = x*size;

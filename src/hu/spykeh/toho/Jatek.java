@@ -1,12 +1,11 @@
 package hu.spykeh.toho;
 
-import hu.spykeh.toho.entities.Player;
 import hu.spykeh.toho.entities.PlayerMP;
 import hu.spykeh.toho.gfx.Screen;
 import hu.spykeh.toho.levels.Level;
 import hu.spykeh.toho.net.GameClient;
 import hu.spykeh.toho.net.GameServer;
-import hu.spykeh.toho.net.packets.Packet00Login;
+
 
 import java.awt.Canvas;
 import java.awt.Dimension;
@@ -14,6 +13,9 @@ import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -21,11 +23,12 @@ import javax.swing.JOptionPane;
 public class Jatek extends Canvas implements Runnable {
 
 	private static final long serialVersionUID = 1L;
+	public static boolean offline;
 	public static int state = 0;
 	public static Jatek jatek;
 	private String gameName;
-	private int width = 300;
-	private int height = width / 4 * 3;
+	public static int width = 400;
+	public static int height = width / 16 * 10;
 	private int scale = 3;
 	public JFrame frame;
 	public Graphics g;
@@ -34,7 +37,6 @@ public class Jatek extends Canvas implements Runnable {
 	public Screen screen;
 	public Keyboard keyboard;
 	public Level level;
-	public PlayerMP player;
 	
 	public String jatekosNev;
 	private Thread thread;
@@ -46,11 +48,14 @@ public class Jatek extends Canvas implements Runnable {
 
 	private boolean running = false;
 	
-	public GameServer server;
 	public GameClient client;
+	public GameServer server;
 
+	Scanner scanner;
+	public File configFile;
 	public Jatek(String gameName) {
 		jatek = this;
+		configFile = new File("config.cfg");
 		this.gameName = gameName;
 		screen = new Screen(width, height);
 		frame = new JFrame();
@@ -62,24 +67,27 @@ public class Jatek extends Canvas implements Runnable {
 		setPreferredSize(size);
 		keyboard = new Keyboard();
 		addKeyListener(keyboard);
-		jatekosNev = JOptionPane.showInputDialog("Enter username ");
 		level = new Level(keyboard,this);
-		
+		initFromFile();
 		
 	}
 
+	public void initFromFile(){
+		try {
+			scanner = new Scanner(configFile);
+		} catch (FileNotFoundException e) {
+			System.out.println("nem talalta a filet");
+		}
+		scanner.findInLine("Name = ");
+		jatekosNev = scanner.next();
+		scanner.close();
+		
+	}
 	public synchronized void start() {
 		running = true;
 		thread = new Thread(this, "Game Thread");
 		thread.start();
-		
-		if(JOptionPane.showConfirmDialog(this, "Do you want to run the server?") == 0){
-			server = new GameServer(this);
-			server.start();
-		}
-		client = new GameClient(this, "localhost");
-		client.start();
-		
+
 	}
 
 	public synchronized void stop() {
@@ -144,6 +152,7 @@ public class Jatek extends Canvas implements Runnable {
 				totalTime -= 1000000000.0;
 				fps = frames;
 				ups = updates;
+				
 				frame.setTitle(gameName + " FPS : " + fps + "  UPS : " + ups);
 				frames = 0;
 				updates = 0;
